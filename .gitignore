@@ -1,3 +1,4 @@
+# Local build tools, caches, and machine configuration
 .gradle/
 .gradle-home/
 .tools/
@@ -5,6 +6,17 @@ local.properties
 **/build/
 *.iml
 .idea/
+.DS_Store
+Thumbs.db
+
+# Generated packages and reports; publish installable files as release assets
+/artifacts/
+/dist/
+*.apk
+*.aab
+
+# Signing keys and local signing configuration
 *.jks
 *.keystore
+keystore.properties
 
