@@ -1,19 +1,25 @@
 # Komirka — CSV table maker for Android phones
 
+## [Download Komirka for Android (.apk)](Komirka.apk?raw=true)
+
+Android 8.0 or later · English interface · Version 1.0.0
+
+Download the APK, open it on your phone, and install it. You do not need Android Studio or any development tools.
+
 Komirka is an offline Android app for creating CSV tables on your phone. Define your columns, enter records one field at a time, and export the result as CSV or JSON. It is useful for field observations, inventories, research logs, and other data you want to collect away from a computer.
 
 The app runs on Android 8.0 or later. The interface is in English. No account or internet connection is required, and there are no ads.
 
-[Getting started](#create-a-csv-table-on-your-phone) · [Features](#features) · [CSV import and export](#csv-import-and-export) · [Build instructions](#build-the-android-app)
+[Install](#install-on-android) · [Getting started](#create-a-csv-table-on-your-phone) · [Features](#features) · [CSV import and export](#csv-import-and-export)
 
 ## Install on Android
 
-1. Get an APK built from this source using the [build instructions](#build-the-android-app). If an APK has been attached to a [GitHub release](https://github.com/KoVaLsKeY/TableMakerAppForPhone/releases), you can use that instead.
-2. Transfer the APK to your Android phone and open it from your file manager.
+1. Tap **[Download Komirka for Android](Komirka.apk?raw=true)** on your phone. The same `Komirka.apk` file is also in the root of this repository.
+2. Open the downloaded `Komirka.apk` from your browser's downloads or your file manager. If you downloaded it on a computer, transfer it to your phone first.
 3. If Android asks, allow that file manager to install apps, then complete the installation.
 4. Open **Komirka**. Tap **Create table**, **Import CSV**, or **Try a sample table**.
 
-The debug build is suitable for trying the app by direct installation. A public release needs its own signing key; see the [publishing notes](docs/PUBLISHING.md).
+The included APK is a debug build signed for direct installation. The usage instructions below apply to this English version.
 
 ## Create a CSV table on your phone
 
@@ -146,7 +152,14 @@ JSON is for export and further processing. This version imports CSV only, so a J
 
 Tables and drafts live in the app's private `komirka.db` database. Automatic Android backup is disabled. Uninstalling the app or clearing its storage deletes the local data, so export important tables beforehand. There is no cloud sync.
 
-## Build the Android app
+## For developers
+
+The source code and tests are included for anyone who wants to modify the app. To use it, download the APK above.
+
+<details>
+<summary>Build instructions and project layout</summary>
+
+### Build the Android app
 
 ### 1. Prepare the tools
 
@@ -220,6 +233,8 @@ gradle/wrapper/          Reproducible Gradle launcher
 tools/build.ps1          Optional Windows build helper
 ```
 
-APKs, source archives, build reports, SDK downloads, caches, and signing keys do not belong in the source tree committed to GitHub. Use release attachments for distributable APKs. The [publishing notes](docs/PUBLISHING.md) include a repository description, topic suggestions, and a release checklist.
+`Komirka.apk` is intentionally included in the repository root for direct download. Other generated packages, source archives, test reports, local SDKs, caches, and signing keys are ignored by Git. The [publishing notes](docs/PUBLISHING.md) describe how to refresh the APK and configure the repository description and topics.
+
+</details>
 
 If you find a problem, [open an issue](https://github.com/KoVaLsKeY/TableMakerAppForPhone/issues) with your Android version, the steps to reproduce it, and a small sample CSV when relevant. Remove personal data from examples before sharing them.
