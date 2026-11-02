@@ -1,0 +1,68 @@
+C:\Users\Asus\Desktop\DataAnalisApp\app\src\main\java\ua\komirka\MainActivity.java:98: Warning: Consider using apply() instead; commit writes its data to persistent storage immediately, whereas apply will handle it in the background [ApplySharedPref]
+        editor.putString("schema",schema==null?null:schema.snapshot()); editor.commit();
+                                                                               ~~~~~~~~
+C:\Users\Asus\Desktop\DataAnalisApp\app\src\main\java\ua\komirka\MainActivity.java:296: Warning: Consider using apply() instead; commit writes its data to persistent storage immediately, whereas apply will handle it in the background [ApplySharedPref]
+            state.edit().putString("exportTable",active.id).putBoolean("exportJson",n==1).commit();
+                                                                                          ~~~~~~~~
+
+   Explanation for issues of type "ApplySharedPref":
+   Consider using apply() instead of commit on shared preferences. Whereas
+   commit blocks and writes its data to persistent storage immediately, apply
+   will handle it in the background.
+
+C:\Users\Asus\Desktop\DataAnalisApp\app\build.gradle:43: Warning: A newer version of org.robolectric:robolectric than 4.16.1 is available: 4.17 [NewerVersionAvailable]
+    testImplementation 'org.robolectric:robolectric:4.16.1'
+                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "NewerVersionAvailable":
+   This detector checks with a central repository to see if there are newer
+   versions available for the dependencies used by this project. This is
+   similar to the GradleDependency check, which checks for newer versions
+   available in the Android SDK tools and libraries, but this works with any
+   MavenCentral dependency, and connects to the library every time, which
+   makes it more flexible but also much slower.
+
+C:\Users\Asus\Desktop\DataAnalisApp\app\src\main\AndroidManifest.xml:6: Warning: The attribute android:dataExtractionRules only applies for Android 12 and higher; since minSdkVersion is API 26 you should also set android:fullBackupContent [DataExtractionRules]
+        android:dataExtractionRules="@xml/backup_rules"
+                                     ~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "DataExtractionRules":
+   Before Android 12, the attributes android:allowBackup and
+   android:fullBackupContent were used to configure all forms of backup,
+   including cloud backups, device-to-device transfers and adb backup.
+
+   In Android 12 and higher, these attributes have been deprecated and will
+   only apply to cloud backups. You should instead use the attribute
+   android:dataExtractionRules, specifying an @xml resource that configures
+   which files to back up, for cloud backups and for device-to-device
+   transfers, separately. If your minSdkVersion supports older versions,
+   you'll still want to specify an android:fullBackupContent resource if the
+   default behavior is not right for your app.
+
+   https://developer.android.com/about/versions/12/backup-restore#xml-changes
+   https://goo.gle/DataExtractionRules
+
+C:\Users\Asus\Desktop\DataAnalisApp\app\src\main\java\ua\komirka\ui\EntryEditor.java:112: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+            if(draft.externalId.trim().isEmpty()){error.setText("Введіть унікальний ID.");return false;}return true;
+                                                                ~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Asus\Desktop\DataAnalisApp\app\src\main\java\ua\komirka\ui\SchemaEditor.java:70: Warning: Do not concatenate text displayed with setText. Use resource string with placeholders. [SetTextI18n]
+            RadioButton radio=new RadioButton(a);radio.setId(View.generateViewId());radio.setText(mode.title+"\n"+mode.description);radio.setTextSize(15);radio.setTextColor(INK);radio.setPadding(u.dp(8),u.dp(12),u.dp(12),u.dp(12));radio.setMinHeight(u.dp(64));radio.setTag(mode);
+                                                                                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Asus\Desktop\DataAnalisApp\app\src\main\java\ua\komirka\ui\SchemaEditor.java:79: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+            if(table.name.isEmpty()||table.name.length()>120) {error.setText("Вкажіть назву таблиці — від 1 до 120 символів.");name.requestFocus();return;}
+                                                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "SetTextI18n":
+   When calling TextView#setText
+   * Never call Number#toString() to format numbers; it will not handle
+   fraction separators and locale-specific digits properly. Consider using
+   String#format with proper format specifications (%d or %f) instead.
+   * Do not pass a string literal (e.g. "Hello") to display text. Hardcoded
+   text can not be properly translated to other languages. Consider using
+   Android resource strings instead.
+   * Do not build messages by concatenating text chunks. Such messages can not
+   be properly translated.
+
+   https://developer.android.com/guide/topics/resources/localization.html
+
+0 errors, 7 warnings

@@ -1,0 +1,43 @@
+{
+  "app": "Комірка",
+  "version": "1.0.0",
+  "package": "ua.komirka",
+  "minimumAndroid": "8.0",
+  "minSdk": 26,
+  "targetSdk": 36,
+  "variant": "debug",
+  "apkBytes": 127794,
+  "apkSha256": "89544A242894368379D3BA25866EEE9BAC15CB858CB3C5A5F4C0950BF89C5915",
+  "signatureVerified": true,
+  "signatureScheme": "v2",
+  "requestedPermissions": [],
+  "tests": 46,
+  "failures": 0,
+  "skipped": 0,
+  "testSuites": [
+    {
+      "Suite": "ua.komirka.core.CsvTest",
+      "Tests": 12,
+      "Failures": 0
+    },
+    {
+      "Suite": "ua.komirka.core.ValuesTest",
+      "Tests": 13,
+      "Failures": 0
+    },
+    {
+      "Suite": "ua.komirka.data.StoreTest",
+      "Tests": 15,
+      "Failures": 0
+    },
+    {
+      "Suite": "ua.komirka.UiFlowTest",
+      "Tests": 6,
+      "Failures": 0
+    }
+  ],
+  "lintErrors": 0,
+  "lintWarnings": 7,
+  "runtime": "Robolectric Android API 35 with native graphics and SQLite",
+  "physicalDeviceTested": false
+}

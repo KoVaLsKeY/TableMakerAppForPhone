@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="ua.komirka.UiFlowTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-01T19:44:22.888Z" hostname="DESKTOP-R1PMP55" time="9.578">
+  <properties/>
+  <testcase name="draftSurvivesActivityRecreationWithoutCreatingARow" classname="ua.komirka.UiFlowTest" time="6.058"/>
+  <testcase name="fullEntryIsNotCommittedUntilFinalConfirmationAndEditsKeepAliases" classname="ua.komirka.UiFlowTest" time="1.917"/>
+  <testcase name="fileImportPreviewAndSystemExportResultWorkEndToEnd" classname="ua.komirka.UiFlowTest" time="0.683"/>
+  <testcase name="createsOrdinalSchemaThroughTheActualScreens" classname="ua.komirka.UiFlowTest" time="0.522"/>
+  <testcase name="firstLaunchHasClearEmptyStateAndNoFakeRecords" classname="ua.komirka.UiFlowTest" time="0.165"/>
+  <testcase name="nullAndBackNavigationRetainEarlierAnswers" classname="ua.komirka.UiFlowTest" time="0.232"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[Invalid ID 0x00000000.
+Invalid ID 0x00000000.
+Invalid ID 0x00000000.
+Invalid ID 0x00000000.
+Invalid ID 0x00000000.
+Invalid ID 0x00000000.
+Invalid ID 0x00000000.
+]]></system-err>
+</testsuite>

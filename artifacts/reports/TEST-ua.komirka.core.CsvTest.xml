@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="ua.komirka.core.CsvTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-11-01T19:44:32.469Z" hostname="DESKTOP-R1PMP55" time="0.01">
+  <properties/>
+  <testcase name="emptyLastFieldAndBlankSingleFieldArePreserved" classname="ua.komirka.core.CsvTest" time="0.001"/>
+  <testcase name="rejectsMalformedQuotesAndRaggedRows" classname="ua.komirka.core.CsvTest" time="0.001"/>
+  <testcase name="quotesSemicolonAndTabWhenExportingSingleColumn" classname="ua.komirka.core.CsvTest" time="0.001"/>
+  <testcase name="preservesSpacesAndFormulaTextVerbatim" classname="ua.komirka.core.CsvTest" time="0.0"/>
+  <testcase name="detectsTabOutsideQuotedHeaders" classname="ua.komirka.core.CsvTest" time="0.0"/>
+  <testcase name="detectsSemicolonWithDecimalComma" classname="ua.komirka.core.CsvTest" time="0.001"/>
+  <testcase name="rejectsExcessiveColumnCount" classname="ua.komirka.core.CsvTest" time="0.0"/>
+  <testcase name="supportsHeaderOnlyAndCrLineEndings" classname="ua.komirka.core.CsvTest" time="0.0"/>
+  <testcase name="multilineQuotesUnicodeAndBomRoundTrip" classname="ua.komirka.core.CsvTest" time="0.001"/>
+  <testcase name="delimiterInsideQuotedHeaderDoesNotWin" classname="ua.komirka.core.CsvTest" time="0.0"/>
+  <testcase name="randomEscapedCellsRoundTrip" classname="ua.komirka.core.CsvTest" time="0.004"/>
+  <testcase name="missingHeadersReceiveUniqueNames" classname="ua.komirka.core.CsvTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

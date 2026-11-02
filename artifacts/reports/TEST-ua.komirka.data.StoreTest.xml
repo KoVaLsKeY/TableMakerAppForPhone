@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="ua.komirka.data.StoreTest" tests="15" skipped="0" failures="0" errors="0" timestamp="2026-11-01T19:44:32.561Z" hostname="DESKTOP-R1PMP55" time="3.203">
+  <properties/>
+  <testcase name="uuidIsCreatedOnlyAtCommitAndIsStableOnEdit" classname="ua.komirka.data.StoreTest" time="2.621"/>
+  <testcase name="deletingTableCascadesToRecordsAndDrafts" classname="ua.komirka.data.StoreTest" time="0.04"/>
+  <testcase name="jsonRetainsSchemaOrdinalOrderNullBooleansAndAliases" classname="ua.komirka.data.StoreTest" time="0.04"/>
+  <testcase name="unchangedNumericValueDoesNotAppendHistory" classname="ua.komirka.data.StoreTest" time="0.042"/>
+  <testcase name="draftsSurviveReopeningAndDoNotConsumeIds" classname="ua.komirka.data.StoreTest" time="0.045"/>
+  <testcase name="duplicateManualIdRollsBackAndKeepsDraft" classname="ua.komirka.data.StoreTest" time="0.042"/>
+  <testcase name="rejectsStaleEditsWithoutOverwritingOrRemovingDraft" classname="ua.komirka.data.StoreTest" time="0.043"/>
+  <testcase name="canRestoreReplaceAndDeleteAliases" classname="ua.komirka.data.StoreTest" time="0.039"/>
+  <testcase name="ukrainianSearchIsCaseInsensitiveAndWildcardsAreLiteral" classname="ua.komirka.data.StoreTest" time="0.037"/>
+  <testcase name="editingIsIsolatedUntilCommitAndKeepsTypedAliases" classname="ua.komirka.data.StoreTest" time="0.041"/>
+  <testcase name="importIsAtomicAndKeepsColumnMappingAfterReorder" classname="ua.komirka.data.StoreTest" time="0.039"/>
+  <testcase name="deletingRecordsNeverReusesSequenceNumbersAndClearsTheirDraft" classname="ua.komirka.data.StoreTest" time="0.037"/>
+  <testcase name="csvExportContainsCurrentValuesOnlyAndRoundTrips" classname="ua.komirka.data.StoreTest" time="0.033"/>
+  <testcase name="importedRowsKeepOriginalOrderOnExport" classname="ua.komirka.data.StoreTest" time="0.063"/>
+  <testcase name="invalidImportDoesNotLeavePartialTable" classname="ua.komirka.data.StoreTest" time="0.041"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
