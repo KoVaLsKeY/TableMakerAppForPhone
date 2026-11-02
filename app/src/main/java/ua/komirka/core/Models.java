@@ -6,13 +6,13 @@ import java.util.*;
 public final class Models {
     private Models() {}
     public enum Kind {
-        STRING("Текст", "String", "Імена, нотатки та будь-який текст", "Aa"),
-        INT("Ціле число", "int", "Кількість без дробової частини", "12"),
-        FLOAT("Дробове число", "float", "Вимірювання; крапка або кома", "1,2"),
-        CATEGORY("Категорія", "category", "Один варіант із вашого списку", "≡"),
-        ORDINAL("Впорядковані категорії", "ordinal", "Варіанти від меншого до більшого", "↗"),
-        BOOL("Так / Ні", "bool", "Два зрозумілі варіанти", "✓"),
-        DATE("Дата", "date", "Вибір у календарі", "▦");
+        STRING("Text", "String", "Names, notes, and other text", "Aa"),
+        INT("Integer", "int", "Whole numbers, such as counts", "12"),
+        FLOAT("Decimal", "float", "Measurements with a decimal point or comma", "1.2"),
+        CATEGORY("Category", "category", "One option from your list", "≡"),
+        ORDINAL("Ordered categories", "ordinal", "Options arranged from lowest to highest", "↗"),
+        BOOL("Yes / No", "bool", "A choice between two values", "✓"),
+        DATE("Date", "date", "Choose a date from the calendar", "▦");
         public final String title, code, description, mark;
         Kind(String title, String code, String description, String mark) {
             this.title=title; this.code=code; this.description=description; this.mark=mark;
@@ -20,10 +20,10 @@ public final class Models {
         public boolean options() { return this == CATEGORY || this == ORDINAL; }
     }
     public enum IdMode {
-        NONE("Без окремого ID", "Лише ваші стовпці"),
-        AUTO("Автоматичний UUID", "Унікальний код для кожного нового запису"),
-        INCREMENT("Автоінкремент", "Послідовні числа: 1, 2, 3…"),
-        MANUAL("Вводити ID вручну", "Ваш власний унікальний текстовий код");
+        NONE("No ID column", "Use only the columns you add"),
+        AUTO("Automatic UUID", "Generate a unique code for each record"),
+        INCREMENT("Auto-increment", "Number records in order: 1, 2, 3…"),
+        MANUAL("Manual ID", "Enter your own unique text code");
         public final String title, description;
         IdMode(String title, String description) { this.title=title; this.description=description; }
     }

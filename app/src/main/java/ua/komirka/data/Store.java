@@ -20,7 +20,7 @@ public final class Store extends SQLiteOpenHelper {
         db.execSQL("CREATE TABLE drafts (table_id TEXT PRIMARY KEY REFERENCES datasets(id) ON DELETE CASCADE, data TEXT NOT NULL)");
     }
     @Override public void onUpgrade(SQLiteDatabase db,int oldVersion,int newVersion) {
-        throw new IllegalStateException("Непідтримувана версія сховища; дані залишено без змін.");
+        throw new IllegalStateException("Unsupported database version. Your data has not been changed.");
     }
     public List<Table> tables() {
         List<Table> result=new ArrayList<>();
@@ -82,10 +82,10 @@ public final class Store extends SQLiteOpenHelper {
         SQLiteDatabase db=getWritableDatabase(); db.beginTransaction();
         try {
             Table t=table(passedTable.id);
-            if(t==null || !t.id.equals(d.tableId)) throw new IllegalArgumentException("Таблицю не знайдено.");
+            if(t==null || !t.id.equals(d.tableId)) throw new IllegalArgumentException("Table not found.");
             Map<String,Object> values=Values.validateDraft(t,d); Row old=d.rowId==null?null:row(d.rowId);
             if(d.rowId!=null && (old==null || old.version!=d.baseVersion || !old.tableId.equals(t.id)))
-                throw new IllegalArgumentException("Запис змінився або його видалено. Відкрийте актуальний запис знову.");
+                throw new IllegalArgumentException("This record has changed or been deleted. Open the current record again.");
             Row r=old==null?new Row():old; r.tableId=t.id;
             r.history=Codec.history(Codec.history(d.history));
             if(old!=null) {
@@ -99,14 +99,14 @@ public final class Store extends SQLiteOpenHelper {
             else if(old==null) {
                 if(t.idMode==IdMode.AUTO) r.externalId=UUID.randomUUID().toString();
                 if(t.idMode==IdMode.INCREMENT) {
-                    if(t.nextId==Long.MAX_VALUE) throw new IllegalArgumentException("Діапазон автоінкременту вичерпано.");
+                    if(t.nextId==Long.MAX_VALUE) throw new IllegalArgumentException("The auto-increment ID limit has been reached.");
                     r.externalId=String.valueOf(t.nextId++);
                 }
             }
             r.updatedAt=System.currentTimeMillis(); r.version++; writeRow(db,r,old!=null);
             t.updatedAt=r.updatedAt; db.update("datasets",tableValues(t),"id=?",new String[]{t.id});
             clearDraft(t.id); db.setTransactionSuccessful(); return r;
-        } catch(SQLiteConstraintException e) { throw new IllegalArgumentException("Такий ID уже існує. Введіть інший унікальний ID.",e); }
+        } catch(SQLiteConstraintException e) { throw new IllegalArgumentException("This ID already exists. Enter a different, unique ID.",e); }
         finally { db.endTransaction(); }
     }
     private void writeRow(SQLiteDatabase db,Row r,boolean update) {
@@ -133,11 +133,11 @@ public final class Store extends SQLiteOpenHelper {
                 index++; Row r=new Row(); r.tableId=t.id; r.version=1;
                 for(Column c:t.columns) {
                     try { r.values.put(c.key,c.sourceIndex<0?null:Values.parse(c,cells.get(c.sourceIndex))); }
-                    catch(IllegalArgumentException ex) { throw new IllegalArgumentException("CSV-рядок "+index+", «"+c.name+"»: "+ex.getMessage()); }
+                    catch(IllegalArgumentException ex) { throw new IllegalArgumentException("CSV record "+index+", “"+c.name+"”: "+ex.getMessage()); }
                 }
                 if(t.idMode==IdMode.AUTO) r.externalId=UUID.randomUUID().toString();
                 if(t.idMode==IdMode.INCREMENT) r.externalId=String.valueOf(t.nextId++);
-                if(t.idMode==IdMode.MANUAL) throw new IllegalArgumentException("Під час імпорту залиште ID звичайним стовпцем або оберіть автоматичний ID.");
+                if(t.idMode==IdMode.MANUAL) throw new IllegalArgumentException("For import, keep the existing ID as a regular column or choose an automatic ID.");
                 writeRow(db,r,false);
             }
             db.update("datasets",tableValues(t),"id=?",new String[]{t.id}); db.setTransactionSuccessful();

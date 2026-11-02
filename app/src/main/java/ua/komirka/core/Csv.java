@@ -16,25 +16,25 @@ public final class Csv {
         }
     }
     public static Document read(String input) {
-        if (input.length()>MAX_CHARS) throw new IllegalArgumentException("CSV завеликий. Максимум — 10 МБ тексту.");
+        if (input.length()>MAX_CHARS) throw new IllegalArgumentException("The CSV is too large. The text limit is 10 MB.");
         if (input.startsWith("\uFEFF")) input=input.substring(1);
-        if (input.trim().isEmpty()) throw new IllegalArgumentException("CSV-файл порожній.");
+        if (input.trim().isEmpty()) throw new IllegalArgumentException("The CSV file is empty.");
         char sep=detect(input);
         List<List<String>> all=parse(input,sep);
-        if (all.isEmpty()) throw new IllegalArgumentException("CSV не містить заголовків.");
+        if (all.isEmpty()) throw new IllegalArgumentException("The CSV has no column headers.");
         List<String> headers=new ArrayList<>(all.remove(0));
         Set<String> seen=new HashSet<>();
         for(int i=0;i<headers.size();i++) {
             String h=headers.get(i).trim();
-            if(h.isEmpty()) h="Стовпець "+(i+1);
-            if(h.length()>100) throw new IllegalArgumentException("Назва стовпця "+(i+1)+" довша за 100 символів.");
+            if(h.isEmpty()) h="Column "+(i+1);
+            if(h.length()>100) throw new IllegalArgumentException("Column name "+(i+1)+" exceeds 100 characters.");
             String base=h; int suffix=2;
             while(!seen.add(h.toLowerCase(Locale.ROOT))) h=base+" ("+(suffix++)+")";
             headers.set(i,h);
         }
         for(int i=0;i<all.size();i++) {
             List<String> row=all.get(i);
-            if(row.size()!=headers.size()) throw new IllegalArgumentException("Рядок "+(i+2)+": "+row.size()+" клітинок замість "+headers.size()+". Перевірте роздільник і лапки.");
+            if(row.size()!=headers.size()) throw new IllegalArgumentException("Record "+(i+2)+": "+row.size()+" cells instead of "+headers.size()+". Check the delimiter and quotation marks.");
         }
         return new Document(headers,all,sep);
     }
@@ -66,22 +66,22 @@ public final class Csv {
             }
             if(c==separator || c=='\r'||c=='\n') {
                 row.add(field.toString()); field.setLength(0); closed=false; started=false;
-                if(row.size()>MAX_COLUMNS) throw new IllegalArgumentException("CSV містить понад 100 стовпців.");
+                if(row.size()>MAX_COLUMNS) throw new IllegalArgumentException("The CSV contains more than 100 columns.");
                 if(c!=separator) {
                     rows.add(row); row=new ArrayList<>();
-                    if(rows.size()>MAX_ROWS+1) throw new IllegalArgumentException("CSV містить понад 50 000 записів.");
+                    if(rows.size()>MAX_ROWS+1) throw new IllegalArgumentException("The CSV contains more than 50,000 records.");
                     if(c=='\r' && i+1<s.length() && s.charAt(i+1)=='\n') i++;
                 }
             } else if(c=='"' && !started && field.length()==0 && !closed) { quoted=true; started=true; }
             else {
-                if(closed || c=='"') throw new IllegalArgumentException("Некоректні лапки біля CSV-рядка "+(rows.size()+1)+".");
+                if(closed || c=='"') throw new IllegalArgumentException("Invalid quotation marks near CSV record "+(rows.size()+1)+".");
                 field.append(c); started=true;
             }
         }
-        if(quoted) throw new IllegalArgumentException("Незакриті лапки в CSV-файлі.");
+        if(quoted) throw new IllegalArgumentException("The CSV contains an unclosed quotation mark.");
         if(started || closed || field.length()>0 || !row.isEmpty()) { row.add(field.toString()); rows.add(row); }
-        if(rows.size()>MAX_ROWS+1) throw new IllegalArgumentException("CSV містить понад 50 000 записів.");
-        for(List<String> r:rows) if(r.size()>MAX_COLUMNS) throw new IllegalArgumentException("CSV містить понад 100 стовпців.");
+        if(rows.size()>MAX_ROWS+1) throw new IllegalArgumentException("The CSV contains more than 50,000 records.");
+        for(List<String> r:rows) if(r.size()>MAX_COLUMNS) throw new IllegalArgumentException("The CSV contains more than 100 columns.");
         return rows;
     }
     public static void writeRow(Writer writer,List<?> cells) throws IOException {

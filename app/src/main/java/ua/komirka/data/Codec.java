@@ -9,7 +9,7 @@ public final class Codec {
     private Codec() {}
     public static JSONObject object(String source) {
         try { return new JSONObject(source); }
-        catch(JSONException e) { throw new IllegalArgumentException("Не вдалося прочитати збережені дані.",e); }
+        catch(JSONException e) { throw new IllegalArgumentException("Could not read the saved data.",e); }
     }
     public static JSONObject put(JSONObject o,String key,Object value) {
         try { o.put(key,value==null ? JSONObject.NULL:value); return o; }

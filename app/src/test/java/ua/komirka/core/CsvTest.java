@@ -22,7 +22,7 @@ public class CsvTest {
         Csv.Document csv=Csv.read("\"a;b;c\",d\n1,2");assertEquals(',',csv.separator);assertEquals("a;b;c",csv.headers.get(0));
     }
     @Test public void missingHeadersReceiveUniqueNames() {
-        Csv.Document csv=Csv.read("a,a,,\n1,2,3,4");assertEquals(Arrays.asList("a","a (2)","Стовпець 3","Стовпець 4"),csv.headers);
+        Csv.Document csv=Csv.read("a,a,,\n1,2,3,4");assertEquals(Arrays.asList("a","a (2)","Column 3","Column 4"),csv.headers);
     }
     @Test public void emptyLastFieldAndBlankSingleFieldArePreserved() {
         assertEquals(Arrays.asList("1",""),Csv.read("a,b\n1,\n").rows.get(0));

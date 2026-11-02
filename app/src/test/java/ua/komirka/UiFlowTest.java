@@ -23,7 +23,7 @@ import static org.junit.Assert.*;
 
 /** Drives the real Activity and native widgets in a JVM Android runtime. */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk=35,qualifiers="uk-rUA-w393dp-h852dp-xhdpi")
+@Config(sdk=35,qualifiers="en-rUS-w393dp-h852dp-xhdpi")
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @LooperMode(LooperMode.Mode.PAUSED)
 public class UiFlowTest {
@@ -47,43 +47,43 @@ public class UiFlowTest {
     private void input(String hint,String value){field(hint).setText(value);idle();}
     private void waitUntil(BooleanSupplier condition) throws Exception {long deadline=System.currentTimeMillis()+8000;while(!condition.getAsBoolean()&&System.currentTimeMillis()<deadline){Thread.sleep(25);idle();}assertTrue("Background task did not complete",condition.getAsBoolean());}
     private Table example() {
-        Table t=new Table();t.name="Польові спостереження";t.description="Щоденник дослідження · осінь 2026";t.idMode=IdMode.INCREMENT;
-        Column title=new Column("Місце спостереження",Kind.STRING),count=new Column("Кількість зразків",Kind.INT),temp=new Column("Температура, °C",Kind.FLOAT),site=new Column("Середовище",Kind.CATEGORY),rank=new Column("Якість зразка",Kind.ORDINAL),done=new Column("Перевірено",Kind.BOOL);
-        site.options.addAll(Arrays.asList("Ліс","Лука","Біля водойми"));rank.options.addAll(Arrays.asList("Низька","Середня","Висока"));t.columns.addAll(Arrays.asList(title,count,temp,site,rank,done));a.store.create(t);return t;
+        Table t=new Table();t.name="Field observations";t.description="Field journal · autumn 2026";t.idMode=IdMode.INCREMENT;
+        Column title=new Column("Location",Kind.STRING),count=new Column("Sample count",Kind.INT),temp=new Column("Temperature, °C",Kind.FLOAT),site=new Column("Habitat",Kind.CATEGORY),rank=new Column("Sample quality",Kind.ORDINAL),done=new Column("Checked",Kind.BOOL);
+        site.options.addAll(Arrays.asList("Forest","Meadow","Waterside"));rank.options.addAll(Arrays.asList("Low","Medium","High"));t.columns.addAll(Arrays.asList(title,count,temp,site,rank,done));a.store.create(t);return t;
     }
     @Test public void firstLaunchHasClearEmptyStateAndNoFakeRecords() throws Exception {
-        assertTrue(a.store.tables().isEmpty());text(root(),"Місце для ваших ідей");text(root(),"Імпортувати CSV");screenshot("01-home-empty");
+        assertTrue(a.store.tables().isEmpty());text(root(),"Start your first table");text(root(),"Import CSV");screenshot("01-home-empty");
     }
     @Test public void createsOrdinalSchemaThroughTheActualScreens() throws Exception {
-        click("Створити таблицю");input("Польові спостереження","Щоденник самопочуття");text(root(),"Автоінкремент").performClick();idle();screenshot("02-table-settings");click("Далі: стовпці");click("Додати стовпець");input("Температура","Самопочуття");Spinner spinner=(Spinner)find(root(),v->v instanceof Spinner);spinner.setSelection(Kind.ORDINAL.ordinal());idle();
-        for(String category:Arrays.asList("Погано","Звичайно","Чудово")){input("Нова категорія",category);View add=find(root(),v->"Додати категорію".contentEquals(v.getContentDescription()==null?"":v.getContentDescription()));assertNotNull(add);add.performClick();idle();}
-        screenshot("03-ordinal-builder");click("Далі: зберегти стовпець");assertEquals(Arrays.asList("Погано","Звичайно","Чудово"),a.schema.table.columns.get(0).options);
-        assertTrue(a.store.tables().isEmpty());click("Створити таблицю");waitUntil(()->a.screen.equals("table"));assertEquals(1,a.store.tables().size());assertEquals(IdMode.INCREMENT,a.active.idMode);
+        click("Create table");input("Field observations","Wellbeing journal");text(root(),"Auto-increment").performClick();idle();screenshot("02-table-settings");click("Next: columns");click("Add column");input("Temperature","Wellbeing");Spinner spinner=(Spinner)find(root(),v->v instanceof Spinner);spinner.setSelection(Kind.ORDINAL.ordinal());idle();
+        for(String category:Arrays.asList("Low","Neutral","Good")){input("New category",category);View add=find(root(),v->"Add category".contentEquals(v.getContentDescription()==null?"":v.getContentDescription()));assertNotNull(add);add.performClick();idle();}
+        screenshot("03-ordinal-builder");click("Save column");assertEquals(Arrays.asList("Low","Neutral","Good"),a.schema.table.columns.get(0).options);
+        assertTrue(a.store.tables().isEmpty());click("Create table");waitUntil(()->a.screen.equals("table"));assertEquals(1,a.store.tables().size());assertEquals(IdMode.INCREMENT,a.active.idMode);
     }
     @Test public void fullEntryIsNotCommittedUntilFinalConfirmationAndEditsKeepAliases() throws Exception {
-        Table t=example();a.showTable(t.id);a.newRecord();idle();input("Введіть значення","Озеро, північний берег");screenshot("04-text-entry");click("Далі →");input("Наприклад, 42","12");assertEquals(android.text.InputType.TYPE_CLASS_NUMBER,field("Наприклад, 42").getInputType()&android.text.InputType.TYPE_MASK_CLASS);click("Далі →");input("Наприклад, 3,14","18,7");assertEquals(android.text.InputType.TYPE_CLASS_NUMBER,field("Наприклад, 3,14").getInputType()&android.text.InputType.TYPE_MASK_CLASS);click("Далі →");click("Біля водойми");screenshot("05-category");click("Далі →");click("Висока");click("Далі →");click("Ні");screenshot("06-boolean");click("Перевірити →");screenshot("07-review");assertEquals(0,a.store.table(t.id).rowCount);
-        click("Закінчити та додати");assertEquals(1,a.store.table(t.id).rowCount);Row row=a.store.rows(t.id,"",10,0).get(0);assertEquals(false,row.values.get(t.columns.get(5).key));assertEquals(18.7,row.values.get(t.columns.get(2).key));
-        Draft d=a.store.editDraft(t,row);d.step=0;a.store.saveDraft(d);a.openDraft();input("Введіть значення","Озеро, східний берег");a.entry.draft.step=t.columns.size();a.entry.render();click("Закінчити та зберегти");row=a.store.row(row.id);assertEquals("Озеро, північний берег",row.history.get(t.columns.get(0).key).get(0).value);
-        d=a.store.editDraft(t,row);d.step=t.columns.size();a.store.saveDraft(d);a.openDraft();click("Історія / aliases");AlertDialog history=ShadowAlertDialog.getLatestAlertDialog();View restore=text(history.getWindow().getDecorView(),"Відновити значення");restore.performClick();idle();assertEquals("Озеро, північний берег",a.entry.draft.raw.get(t.columns.get(0).key));click("Закінчити та зберегти");screenshot("08-records");
+        Table t=example();a.showTable(t.id);a.newRecord();idle();input("Enter a value","Lake, north shore");screenshot("04-text-entry");click("Next →");input("For example, 42","12");assertEquals(android.text.InputType.TYPE_CLASS_NUMBER,field("For example, 42").getInputType()&android.text.InputType.TYPE_MASK_CLASS);click("Next →");input("For example, 3.14","18,7");assertEquals(android.text.InputType.TYPE_CLASS_NUMBER,field("For example, 3.14").getInputType()&android.text.InputType.TYPE_MASK_CLASS);click("Next →");click("Waterside");screenshot("05-category");click("Next →");click("High");click("Next →");click("No");screenshot("06-boolean");click("Review →");screenshot("07-review");assertEquals(0,a.store.table(t.id).rowCount);
+        click("Save record");assertEquals(1,a.store.table(t.id).rowCount);Row row=a.store.rows(t.id,"",10,0).get(0);assertEquals(false,row.values.get(t.columns.get(5).key));assertEquals(18.7,row.values.get(t.columns.get(2).key));
+        Draft d=a.store.editDraft(t,row);d.step=0;a.store.saveDraft(d);a.openDraft();input("Enter a value","Lake, east shore");a.entry.draft.step=t.columns.size();a.entry.render();click("Save changes");row=a.store.row(row.id);assertEquals("Lake, north shore",row.history.get(t.columns.get(0).key).get(0).value);
+        d=a.store.editDraft(t,row);d.step=t.columns.size();a.store.saveDraft(d);a.openDraft();click("Value history");AlertDialog history=ShadowAlertDialog.getLatestAlertDialog();View restore=text(history.getWindow().getDecorView(),"Restore value");restore.performClick();idle();assertEquals("Lake, north shore",a.entry.draft.raw.get(t.columns.get(0).key));click("Save changes");screenshot("08-records");
         a.showHome();idle();screenshot("09-home-with-table");
     }
     @Test public void draftSurvivesActivityRecreationWithoutCreatingARow() {
-        Table t=example();a.showTable(t.id);a.newRecord();input("Введіть значення","Незавершений запис");controller.pause().stop().destroy();
-        controller=Robolectric.buildActivity(MainActivity.class).setup().visible();a=controller.get();idle();assertEquals("entry",a.screen);assertEquals("Незавершений запис",field("Введіть значення").getText().toString());assertEquals(0,a.store.table(t.id).rowCount);
+        Table t=example();a.showTable(t.id);a.newRecord();input("Enter a value","Unfinished record");controller.pause().stop().destroy();
+        controller=Robolectric.buildActivity(MainActivity.class).setup().visible();a=controller.get();idle();assertEquals("entry",a.screen);assertEquals("Unfinished record",field("Enter a value").getText().toString());assertEquals(0,a.store.table(t.id).rowCount);
     }
     @Test public void nullAndBackNavigationRetainEarlierAnswers() {
-        Table t=example();a.showTable(t.id);a.newRecord();input("Введіть значення","Річка");click("Далі →");click("Немає значення");click("Далі →");a.entry.previous();assertTrue(a.entry.draft.nulls.contains(t.columns.get(1).key));a.entry.previous();assertEquals("Річка",field("Введіть значення").getText().toString());assertEquals(0,a.store.table(t.id).rowCount);
+        Table t=example();a.showTable(t.id);a.newRecord();input("Enter a value","River");click("Next →");click("No value");click("Next →");a.entry.previous();assertTrue(a.entry.draft.nulls.contains(t.columns.get(1).key));a.entry.previous();assertEquals("River",field("Enter a value").getText().toString());assertEquals(0,a.store.table(t.id).rowCount);
     }
     @Test public void fileImportPreviewAndSystemExportResultWorkEndToEnd() throws Exception {
-        File source=new File(a.getCacheDir(),"Спостереження.csv");
-        try(Writer writer=new OutputStreamWriter(new FileOutputStream(source),java.nio.charset.StandardCharsets.UTF_8)){writer.write("\uFEFFКод;Вага;Перевірено\r\n001;1,25;так\r\n002;;ні\r\n");}
+        File source=new File(a.getCacheDir(),"Observations.csv");
+        try(Writer writer=new OutputStreamWriter(new FileOutputStream(source),java.nio.charset.StandardCharsets.UTF_8)){writer.write("\uFEFFCode;Weight;Checked\r\n001;1,25;yes\r\n002;;no\r\n");}
         a.onActivityResult(11,android.app.Activity.RESULT_OK,new Intent().setData(Uri.fromFile(source)));
         waitUntil(()->a.screen.equals("setup_basic"));assertEquals(Kind.STRING,a.schema.table.columns.get(0).kind);assertEquals(Kind.FLOAT,a.schema.table.columns.get(1).kind);assertEquals(Kind.BOOL,a.schema.table.columns.get(2).kind);
-        click("Далі: стовпці");screenshot("10-import-preview");click("Імпортувати таблицю");waitUntil(()->a.screen.equals("table"));assertEquals(2,a.active.rowCount);
-        click("Експорт");AlertDialog export=ShadowAlertDialog.getLatestAlertDialog();ListView choices=export.getListView();choices.performItemClick(choices.getAdapter().getView(0,null,choices),0,0);idle();
+        click("Next: columns");screenshot("10-import-preview");click("Import table");waitUntil(()->a.screen.equals("table"));assertEquals(2,a.active.rowCount);
+        click("Export");AlertDialog export=ShadowAlertDialog.getLatestAlertDialog();ListView choices=export.getListView();choices.performItemClick(choices.getAdapter().getView(0,null,choices),0,0);idle();
         Intent saveIntent=Shadows.shadowOf(a).getNextStartedActivityForResult().intent;assertEquals(Intent.ACTION_CREATE_DOCUMENT,saveIntent.getAction());assertEquals("text/csv",saveIntent.getType());
         File target=new File(a.getCacheDir(),"export.csv");a.onActivityResult(12,android.app.Activity.RESULT_OK,new Intent().setData(Uri.fromFile(target)));
-        waitUntil(()->"Файл успішно збережено".equals(org.robolectric.shadows.ShadowToast.getTextOfLatestToast()));
+        waitUntil(()->"File saved".equals(org.robolectric.shadows.ShadowToast.getTextOfLatestToast()));
         ua.komirka.core.Csv.Document result=ua.komirka.core.Csv.read(new String(java.nio.file.Files.readAllBytes(target.toPath()),java.nio.charset.StandardCharsets.UTF_8));assertEquals("001",result.rows.get(0).get(0));assertEquals("1.25",result.rows.get(0).get(1));assertEquals("",result.rows.get(1).get(1));assertEquals("false",result.rows.get(1).get(2));
     }
     private void screenshot(String name) throws Exception {

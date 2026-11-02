@@ -61,7 +61,7 @@ public final class MainActivity extends Activity {
         schema=new SchemaEditor(this);
         String savedSchema=state.getString("schema",null);
         try { if(savedSchema!=null) schema.restore(savedSchema); }
-        catch(RuntimeException e) { toast("Налаштування нової таблиці не вдалося відновити."); }
+        catch(RuntimeException e) { toast("Could not restore the new table setup."); }
         String id=state.getString("table",null); if(id!=null) active=store.table(id);
         screen=state.getString("screen","home");
         if(job!=null) {
@@ -74,7 +74,7 @@ public final class MainActivity extends Activity {
             Table already=store.table(schema.table.id);
             if(already!=null) { schema.clear(); showTable(already.id); return; }
             if(schema.isImport) {
-                startJob("Відновлюємо імпорт…","restore",()->Csv.read(readInternalCsv())); return;
+                startJob("Resuming import…","restore",()->Csv.read(readInternalCsv())); return;
             }
             schema.render(); return;
         }
@@ -115,13 +115,13 @@ public final class MainActivity extends Activity {
         });
         else frame.setFitsSystemWindows(true);
         LinearLayout toolbar=ui.row(); toolbar.setPadding(ui.dp(12),ui.dp(4),ui.dp(16),ui.dp(4));
-        if(goBack!=null) toolbar.addView(ui.icon("←","Назад",goBack),new LinearLayout.LayoutParams(ui.dp(48),-2));
+        if(goBack!=null) toolbar.addView(ui.icon("←","Back",goBack),new LinearLayout.LayoutParams(ui.dp(48),-2));
         else {
             TextView logo=ui.badge("▦",0); toolbar.addView(logo,new LinearLayout.LayoutParams(ui.dp(42),ui.dp(42))); ui.gap(toolbar,12);
         }
         ui.weight(toolbar,ui.text(title,18,INK,true));
-        if("home".equals(name)) toolbar.addView(ui.icon("?","Довідка",this::showHelp),new LinearLayout.LayoutParams(ui.dp(48),-2));
-        if("table".equals(name)) toolbar.addView(ui.icon("⋯","Налаштування таблиці",this::tableMenu),new LinearLayout.LayoutParams(ui.dp(48),-2));
+        if("home".equals(name)) toolbar.addView(ui.icon("?","Help",this::showHelp),new LinearLayout.LayoutParams(ui.dp(48),-2));
+        if("table".equals(name)) toolbar.addView(ui.icon("⋯","Table settings",this::tableMenu),new LinearLayout.LayoutParams(ui.dp(48),-2));
         root.addView(toolbar,new LinearLayout.LayoutParams(-1,-2));
         scroll=new ScrollView(this); scroll.setFillViewport(true); scroll.setClipToPadding(false);
         body=ui.column(); body.setPadding(ui.dp(22),ui.dp(18),ui.dp(22),ui.dp(24)); scroll.addView(body);
@@ -138,33 +138,33 @@ public final class MainActivity extends Activity {
         footer.setVisibility(View.VISIBLE); footer.removeAllViews(); ui.add(footer,ui.button(text,true,action));
     }
     public void showHome() {
-        entry=null; active=null; page("home","Комірка",null);
-        ui.add(body,ui.chip("ПРОСТІ ТАБЛИЦІ · БЕЗ ІНТЕРНЕТУ",GREEN,PALE));
-        ui.add(body,ui.title("Ваші дані.\nУсе на місці."),18);
-        ui.add(body,ui.muted("Збирайте спостереження, ведіть облік,\nзаписуйте важливе — у своєму темпі."),12);
+        entry=null; active=null; page("home","Komirka",null);
+        ui.add(body,ui.chip("CSV TABLES · OFFLINE",GREEN,PALE));
+        ui.add(body,ui.title("Your tables,\nwherever you go."),18);
+        ui.add(body,ui.muted("Collect observations, keep records, and export a CSV when you need it."),12);
         List<Table> tables=store.tables();
         if(!tables.isEmpty()) {
             long rows=0; for(Table t:tables) rows+=t.rowCount;
-            LinearLayout stats=ui.row(); ui.weight(stats,stat(String.valueOf(tables.size()),Values.noun(tables.size(),"таблиця","таблиці","таблиць"))); ui.gap(stats,12); ui.weight(stats,stat(String.valueOf(rows),Values.noun(rows,"запис","записи","записів"))); ui.add(body,stats,22);
+            LinearLayout stats=ui.row(); ui.weight(stats,stat(String.valueOf(tables.size()),Values.noun(tables.size(),"table","tables"))); ui.gap(stats,12); ui.weight(stats,stat(String.valueOf(rows),Values.noun(rows,"record","records"))); ui.add(body,stats,22);
         }
-        ui.add(body,ui.button("＋  Створити таблицю",true,()->{
-            if(schema.table!=null) new AlertDialog.Builder(this).setTitle("Є незавершена таблиця").setMessage("Можна продовжити її налаштування або почати нову.")
-                .setPositiveButton("Продовжити",(d,w)->schema.render()).setNeutralButton("Нова таблиця",(d,w)->schema.start()).setNegativeButton("Скасувати",null).show();
+        ui.add(body,ui.button("＋  Create table",true,()->{
+            if(schema.table!=null) new AlertDialog.Builder(this).setTitle("Continue setting up your table?").setMessage("Resume your saved setup or start a new table.")
+                .setPositiveButton("Continue",(d,w)->schema.render()).setNeutralButton("New table",(d,w)->schema.start()).setNegativeButton("Cancel",null).show();
             else schema.start();
         }),24);
-        ui.add(body,ui.button("↥  Імпортувати CSV",false,this::pickCsv),10);
-        if(schema.table!=null) ui.add(body,ui.quiet("Продовжити налаштування «"+(schema.table.name.isEmpty()?"Нова таблиця":schema.table.name)+"»",schema::render),8);
-        ui.section(body,"Мої таблиці",tables.isEmpty()?null:"Усі зміни зберігаються на цьому пристрої");
+        ui.add(body,ui.button("↥  Import CSV",false,this::pickCsv),10);
+        if(schema.table!=null) ui.add(body,ui.quiet("Continue setup: “"+(schema.table.name.isEmpty()?"New table":schema.table.name)+"”",schema::render),8);
+        ui.section(body,"My tables",tables.isEmpty()?null:"Saved on this device");
         if(tables.isEmpty()) {
-            LinearLayout empty=ui.card(); ui.add(empty,ui.text("Місце для ваших ідей",21,INK,true));
-            ui.add(empty,ui.muted("Створіть першу таблицю, додайте потрібні стовпці — і починайте з одного запису."),10);
-            ui.add(empty,ui.quiet("Спробувати на прикладі",this::createExample),18); ui.add(body,empty,14);
+            LinearLayout empty=ui.card(); ui.add(empty,ui.text("Start your first table",21,INK,true));
+            ui.add(empty,ui.muted("Choose your columns, then add your first record. You can also explore a sample table."),10);
+            ui.add(empty,ui.quiet("Try a sample table",this::createExample),18); ui.add(body,empty,14);
         } else {
-            EditText query=ui.input("Знайти таблицю…","",InputType.TYPE_CLASS_TEXT); ui.add(body,query,14);
+            EditText query=ui.input("Find a table…","",InputType.TYPE_CLASS_TEXT); ui.add(body,query,14);
             LinearLayout list=ui.column(); ui.add(body,list,12); fillTables(list,tables,"");
             ui.watch(query,s->fillTables(list,tables,s));
         }
-        ui.add(body,ui.muted("Без реєстрації. Без реклами. Дані залишаються у вас."),22);
+        ui.add(body,ui.muted("No account. No ads. Stored on your device."),22);
     }
     private View stat(String value,String label) {
         LinearLayout c=ui.card(); ui.add(c,ui.text(value,27,INK,true)); ui.add(c,ui.muted(label),6); return c;
@@ -179,15 +179,15 @@ public final class MainActivity extends Activity {
             ui.gap(top,8); top.addView(ui.text("›",28,MUTED,false)); ui.add(card,top);
             if(!t.description.isEmpty()) ui.add(card,ui.muted(t.description),12);
             Draft draft=store.draft(t.id);
-            ui.add(card,ui.text(draft!=null?"●  Є чернетка":"Оновлено "+date(t.updatedAt),12,draft!=null?GREEN:MUTED,false),14);
+            ui.add(card,ui.text(draft!=null?"●  Draft saved":"Updated "+date(t.updatedAt),12,draft!=null?GREEN:MUTED,false),14);
             ui.clickable(card,()->showTable(t.id)); ui.add(list,card,10);
         }
-        if(count==0) ui.add(list,ui.muted("Таблиць із такою назвою немає."),16);
+        if(count==0) ui.add(list,ui.muted("No tables match that name."),16);
     }
     private void createExample() {
-        Table t=new Table(); t.name="Мої спостереження"; t.description="Приклад: можете змінити назву або видалити таблицю"; t.idMode=IdMode.INCREMENT;
-        Column note=new Column("Спостереження",Kind.STRING), mood=new Column("Оцінка",Kind.ORDINAL), done=new Column("Перевірено",Kind.BOOL);
-        mood.options.addAll(Arrays.asList("Низька","Середня","Висока")); t.columns.addAll(Arrays.asList(note,mood,done)); store.create(t); showTable(t.id);
+        Table t=new Table(); t.name="My observations"; t.description="A sample table you can rename or delete"; t.idMode=IdMode.INCREMENT;
+        Column note=new Column("Observation",Kind.STRING), mood=new Column("Rating",Kind.ORDINAL), done=new Column("Checked",Kind.BOOL);
+        mood.options.addAll(Arrays.asList("Low","Medium","High")); t.columns.addAll(Arrays.asList(note,mood,done)); store.create(t); showTable(t.id);
     }
     public void showTable(String id) {
         active=store.table(id); if(active==null) { showHome(); return; }
@@ -195,20 +195,20 @@ public final class MainActivity extends Activity {
     }
     private void renderTable() {
         active=store.table(active.id); if(active==null) { showHome(); return; }
-        page("table","Мої таблиці",this::showHome);
+        page("table","My tables",this::showHome);
         ui.add(body,ui.title(active.name)); if(!active.description.isEmpty()) ui.add(body,ui.muted(active.description),10);
         ui.add(body,ui.chip(Values.records(active.rowCount)+"  ·  "+Values.columns(active.columns.size()+(active.idMode==IdMode.NONE?0:1)),GREEN,PALE),14);
         Draft draft=store.draft(active.id);
         if(draft!=null) {
             LinearLayout banner=ui.card(); ui.background(banner,PALE,18,0);
-            ui.add(banner,ui.label(draft.rowId==null?"На вас чекає чернетка":"Незавершене редагування"));
-            ui.add(banner,ui.muted("Запис ще не змінює таблицю. Продовжіть, коли буде зручно."),7);
-            ui.add(banner,ui.button("Продовжити",true,this::openDraft),12);
-            ui.add(banner,ui.quiet("Видалити чернетку",()->confirm("Видалити чернетку?","Збережені записи залишаться в таблиці.","Видалити",()->{store.clearDraft(active.id);renderTable();})),4);
+            ui.add(banner,ui.label(draft.rowId==null?"Pick up where you left off":"You have unsaved edits"));
+            ui.add(banner,ui.muted("Your draft is saved. Review and confirm it to update the table."),7);
+            ui.add(banner,ui.button("Continue",true,this::openDraft),12);
+            ui.add(banner,ui.quiet("Delete draft",()->confirm("Delete this draft?","Saved records will stay in the table.","Delete",()->{store.clearDraft(active.id);renderTable();})),4);
             ui.add(body,banner,18);
         }
-        LinearLayout tabs=ui.row(); ui.weight(tabs,ui.button("Записи",!columnsTab,()->{columnsTab=false;renderTable();})); ui.gap(tabs,8);
-        ui.weight(tabs,ui.button("Стовпці",columnsTab,()->{columnsTab=true;renderTable();})); ui.add(body,tabs,22);
+        LinearLayout tabs=ui.row(); ui.weight(tabs,ui.button("Records",!columnsTab,()->{columnsTab=false;renderTable();})); ui.gap(tabs,8);
+        ui.weight(tabs,ui.button("Columns",columnsTab,()->{columnsTab=true;renderTable();})); ui.add(body,tabs,22);
         if(columnsTab) {
             if(active.idMode!=IdMode.NONE) {
                 LinearLayout card=ui.card(); ui.add(card,ui.label(active.idName+" · ID")); ui.add(card,ui.muted(active.idMode.title),6); ui.add(body,card,12);
@@ -217,41 +217,41 @@ public final class MainActivity extends Activity {
                 LinearLayout card=ui.card(); ui.add(card,ui.label(c.name)); ui.add(card,ui.muted(c.kind.title+" · "+c.kind.code),6);
                 if(c.kind.options()) ui.add(card,ui.muted(String.join(c.kind==Kind.ORDINAL?"  →  ":"  ·  ",c.options)),12); ui.add(body,card,12);
             }
-            ui.info(body,"Типи стовпців визначаються під час створення. Щоб змінити структуру, експортуйте CSV та імпортуйте його з новими типами.");
+            ui.info(body,"Column types are set when you create a table. To change them, export a CSV and import it as a new table.");
         } else {
-            EditText query=ui.input("Пошук у записах…",search,InputType.TYPE_CLASS_TEXT); ui.add(body,query,16);
-            LinearLayout viewChoice=ui.row(); Button toggle=ui.quiet(grid?"☷  Списком":"▦  Таблицею",()->{}); toggle.setOnClickListener(v->{grid=!grid;toggle.setText(grid?"☷  Списком":"▦  Таблицею");renderRecords();}); ui.weight(viewChoice,toggle);
-            ui.weight(viewChoice,ui.quiet("↧  Експорт",this::chooseExport)); ui.add(body,viewChoice,8);
+            EditText query=ui.input("Search records…",search,InputType.TYPE_CLASS_TEXT); ui.add(body,query,16);
+            LinearLayout viewChoice=ui.row(); Button toggle=ui.quiet(grid?"☷  Card view":"▦  Grid view",()->{}); toggle.setOnClickListener(v->{grid=!grid;toggle.setText(grid?"☷  Card view":"▦  Grid view");renderRecords();}); ui.weight(viewChoice,toggle);
+            ui.weight(viewChoice,ui.quiet("↧  Export",this::chooseExport)); ui.add(body,viewChoice,8);
             recordsPanel=ui.column(); ui.add(body,recordsPanel,8); renderRecords();
             ui.watch(query,s->{search=s;offset=0;if(searchTask!=null)main.removeCallbacks(searchTask);searchTask=this::renderRecords;main.postDelayed(searchTask,220);});
         }
-        bottom("＋  Новий запис",this::newRecord);
+        bottom("＋  New record",this::newRecord);
     }
     private void renderRecords() {
         if(!screen.equals("table") || recordsPanel==null || columnsTab) return;
         recordsPanel.removeAllViews(); long count=store.countRows(active.id,search); List<Row> rows=store.rows(active.id,search,40,offset);
         if(rows.isEmpty()) {
-            LinearLayout empty=ui.card(); ui.add(empty,ui.text(search.isEmpty()?"Перший запис — початок":"Нічого не знайдено",20,INK,true));
-            ui.add(empty,ui.muted(search.isEmpty()?"Натисніть «Новий запис». Додаток проведе вас через кожне поле.":"Спробуйте інші слова або очистьте пошук."),12); ui.add(recordsPanel,empty,8); return;
+            LinearLayout empty=ui.card(); ui.add(empty,ui.text(search.isEmpty()?"Ready for your first record":"No matching records",20,INK,true));
+            ui.add(empty,ui.muted(search.isEmpty()?"Tap New record to fill in one field at a time.":"Try another search or clear the search field."),12); ui.add(recordsPanel,empty,8); return;
         }
-        ui.add(recordsPanel,ui.muted("Показано "+(offset+1)+"–"+(offset+rows.size())+" із "+count),4);
+        ui.add(recordsPanel,ui.muted("Showing "+(offset+1)+"–"+(offset+rows.size())+" of "+count),4);
         if(grid) renderGrid(rows); else for(Row row:rows) {
             LinearLayout card=ui.card(), top=ui.row();
-            ui.weight(top,ui.text(active.idMode==IdMode.NONE?"Запис · "+date(row.createdAt):active.idName+": "+row.externalId,13,GREEN,true)); top.addView(ui.text("↗",20,GREEN,false)); ui.add(card,top);
+            ui.weight(top,ui.text(active.idMode==IdMode.NONE?"Record · "+date(row.createdAt):active.idName+": "+row.externalId,13,GREEN,true)); top.addView(ui.text("↗",20,GREEN,false)); ui.add(card,top);
             int i=0; for(Column col:active.columns) {
                 if(i++==3) break; ui.add(card,ui.muted(col.name),12); TextView value=ui.text(Values.display(row.values.get(col.key)),16,row.values.get(col.key)==null?MUTED:INK,i==1); value.setMaxLines(2); value.setEllipsize(android.text.TextUtils.TruncateAt.END); ui.add(card,value,4);
             }
-            if(active.columns.size()>3) {int rest=active.columns.size()-3;ui.add(card,ui.muted("Ще "+rest+" "+Values.noun(rest,"поле","поля","полів")+" · натисніть, щоб відкрити"),12);}
+            if(active.columns.size()>3) {int rest=active.columns.size()-3;ui.add(card,ui.muted("+"+rest+" "+Values.noun(rest,"field","fields")+" · tap to open"),12);}
             ui.clickable(card,()->openRecord(row)); ui.add(recordsPanel,card,12);
         }
-        LinearLayout paging=ui.row(); Button prev=ui.button("← Назад",false,()->{offset=Math.max(0,offset-40);renderRecords();scroll.smoothScrollTo(0,0);}); prev.setEnabled(offset>0); prev.setAlpha(offset>0?1:.4f); ui.weight(paging,prev); ui.gap(paging,10);
-        Button next=ui.button("Далі →",false,()->{offset+=40;renderRecords();scroll.smoothScrollTo(0,0);}); next.setEnabled(offset+rows.size()<count); next.setAlpha(next.isEnabled()?1:.4f); ui.weight(paging,next); ui.add(recordsPanel,paging,18);
+        LinearLayout paging=ui.row(); Button prev=ui.button("← Back",false,()->{offset=Math.max(0,offset-40);renderRecords();scroll.smoothScrollTo(0,0);}); prev.setEnabled(offset>0); prev.setAlpha(offset>0?1:.4f); ui.weight(paging,prev); ui.gap(paging,10);
+        Button next=ui.button("Next →",false,()->{offset+=40;renderRecords();scroll.smoothScrollTo(0,0);}); next.setEnabled(offset+rows.size()<count); next.setAlpha(next.isEnabled()?1:.4f); ui.weight(paging,next); ui.add(recordsPanel,paging,18);
     }
     private void renderGrid(List<Row> rows) {
         HorizontalScrollView horizontal=new HorizontalScrollView(this); LinearLayout table=ui.column();
-        LinearLayout header=ui.row(); cell(header,"Запис",true); if(active.idMode!=IdMode.NONE) cell(header,active.idName,true); for(Column c:active.columns) cell(header,c.name,true); ui.add(table,header);
+        LinearLayout header=ui.row(); cell(header,"Record",true); if(active.idMode!=IdMode.NONE) cell(header,active.idName,true); for(Column c:active.columns) cell(header,c.name,true); ui.add(table,header);
         for(Row row:rows) {
-            LinearLayout line=ui.row(); Button edit=ui.button("Відкрити ↗",false,()->openRecord(row)); line.addView(edit,new LinearLayout.LayoutParams(ui.dp(145),-2));
+            LinearLayout line=ui.row(); Button edit=ui.button("Open ↗",false,()->openRecord(row)); line.addView(edit,new LinearLayout.LayoutParams(ui.dp(145),-2));
             if(active.idMode!=IdMode.NONE) cell(line,row.externalId,false); for(Column c:active.columns) cell(line,Values.display(row.values.get(c.key)),false); ui.add(table,line,2);
         }
         horizontal.addView(table); ui.add(recordsPanel,horizontal,12);
@@ -261,8 +261,8 @@ public final class MainActivity extends Activity {
     }
     public void newRecord() {
         if(store.draft(active.id)!=null) {
-            new AlertDialog.Builder(this).setTitle("У вас є чернетка").setMessage("Продовжити її чи замінити новим записом?")
-                .setPositiveButton("Продовжити",(d,w)->openDraft()).setNeutralButton("Замінити",(d,w)->{store.clearDraft(active.id);newRecord();}).setNegativeButton("Скасувати",null).show(); return;
+            new AlertDialog.Builder(this).setTitle("You have a saved draft").setMessage("Continue your draft or replace it with a new record?")
+                .setPositiveButton("Continue",(d,w)->openDraft()).setNeutralButton("Replace",(d,w)->{store.clearDraft(active.id);newRecord();}).setNegativeButton("Cancel",null).show(); return;
         }
         Draft draft=new Draft(); draft.tableId=active.id; store.saveDraft(draft); entry=new EntryEditor(this,draft); entry.render();
     }
@@ -274,34 +274,34 @@ public final class MainActivity extends Activity {
         Draft old=store.draft(active.id);
         Runnable open=()->{ Draft d=store.editDraft(active,row); d.step=active.columns.size()+(active.idMode==IdMode.MANUAL?1:0); store.saveDraft(d); entry=new EntryEditor(this,d); entry.render(); };
         if(old!=null && !row.id.equals(old.rowId)) {
-            new AlertDialog.Builder(this).setTitle("Є інша чернетка").setMessage("Щоб редагувати цей запис, потрібно замінити поточну чернетку.")
-                .setPositiveButton("Замінити чернетку",(d,w)->open.run()).setNegativeButton("Скасувати",null).show();
+            new AlertDialog.Builder(this).setTitle("Another draft is saved").setMessage("Editing this record will replace the current draft.")
+                .setPositiveButton("Replace draft",(d,w)->open.run()).setNegativeButton("Cancel",null).show();
         } else if(old!=null) openDraft(); else open.run();
     }
     public void leaveEntry() { if(entry!=null) { if(!entry.flush())return;entry.detach();entry=null; } renderTable(); }
     private void tableMenu() {
-        new AlertDialog.Builder(this).setTitle(active.name).setItems(new String[]{"Експортувати CSV / JSON","Змінити назву й опис","Видалити таблицю"},(d,which)->{
-            if(which==0) chooseExport(); else if(which==1) rename(); else confirm("Видалити «"+active.name+"»?","Буде видалено всі записи, їхню історію та чернетку. Цю дію не можна скасувати.","Видалити таблицю",()->{store.deleteTable(active.id);showHome();});
+        new AlertDialog.Builder(this).setTitle(active.name).setItems(new String[]{"Export CSV / JSON","Edit name and description","Delete table"},(d,which)->{
+            if(which==0) chooseExport(); else if(which==1) rename(); else confirm("Delete “"+active.name+"”?","This deletes all records, their history, and the draft. This cannot be undone.","Delete table",()->{store.deleteTable(active.id);showHome();});
         }).show();
     }
     private void rename() {
         LinearLayout panel=ui.column(); panel.setPadding(ui.dp(22),ui.dp(12),ui.dp(22),0);
-        EditText name=ui.input("Назва таблиці",active.name,InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_FLAG_CAP_SENTENCES), desc=ui.input("Опис (необов’язково)",active.description,InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+        EditText name=ui.input("Table name",active.name,InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_FLAG_CAP_SENTENCES), desc=ui.input("Description (optional)",active.description,InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_FLAG_MULTI_LINE);
         ui.add(panel,name); ui.add(panel,desc,12); TextView error=ui.error(panel);
-        AlertDialog dialog=new AlertDialog.Builder(this).setTitle("Назва й опис").setView(panel).setPositiveButton("Зберегти",null).setNegativeButton("Скасувати",null).create();
+        AlertDialog dialog=new AlertDialog.Builder(this).setTitle("Name and description").setView(panel).setPositiveButton("Save",null).setNegativeButton("Cancel",null).create();
         dialog.setOnShowListener(v->dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(b->{try {store.rename(active,name.getText().toString(),desc.getText().toString());dialog.dismiss();renderTable();} catch(Exception e) {error.setText(e.getMessage());}}));dialog.show();
     }
     private void chooseExport() {
-        new AlertDialog.Builder(this).setTitle("Зберегти таблицю як…").setItems(new String[]{"CSV · поточні значення, для Excel та аналізу","JSON · типи, категорії та історія значень"},(d,n)->{
+        new AlertDialog.Builder(this).setTitle("Export table").setItems(new String[]{"CSV · current values for spreadsheets and analysis","JSON · types, categories, and value history"},(d,n)->{
             state.edit().putString("exportTable",active.id).putBoolean("exportJson",n==1).commit();
             Intent intent=new Intent(Intent.ACTION_CREATE_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE).setType(n==1?"application/json":"text/csv");
             String filename=active.name.replaceAll("[\\\\/:*?\"<>|\\p{Cntrl}]","_")+"."+(n==1?"json":"csv"); intent.putExtra(Intent.EXTRA_TITLE,filename);
-            try { startActivityForResult(intent,EXPORT_FILE); } catch(ActivityNotFoundException ex) { error("На пристрої немає системного засобу збереження файлів."); }
-        }).setNegativeButton("Скасувати",null).show();
+            try { startActivityForResult(intent,EXPORT_FILE); } catch(ActivityNotFoundException ex) { error("No system file-saving app is available on this device."); }
+        }).setNegativeButton("Cancel",null).show();
     }
     public void pickCsv() {
         Intent intent=new Intent(Intent.ACTION_OPEN_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE).setType("*/*");
-        try { startActivityForResult(intent,IMPORT_CSV); } catch(ActivityNotFoundException ex) { error("На пристрої немає системного засобу вибору файлів."); }
+        try { startActivityForResult(intent,IMPORT_CSV); } catch(ActivityNotFoundException ex) { error("No system file picker is available on this device."); }
     }
     @Override protected void onActivityResult(int request,int result,Intent data) {
         super.onActivityResult(request,result,data);
@@ -309,17 +309,17 @@ public final class MainActivity extends Activity {
         Uri uri=data.getData();
         if(request==IMPORT_CSV) {
             String filename=fileName(uri);
-            startJob("Читаємо й перевіряємо CSV…","read",()->{
+            startJob("Reading your CSV…","read",()->{
                 String text=readCsv(uri); Csv.Document doc=Csv.read(text);
                 try(Writer writer=new OutputStreamWriter(new FileOutputStream(new File(getFilesDir(),"pending-import.csv")),StandardCharsets.UTF_8)) {writer.write(text);}
                 return new Object[]{doc,filename};
             });
         } else if(request==EXPORT_FILE) {
             Table t=store.table(state.getString("exportTable","")); boolean json=state.getBoolean("exportJson",false);
-            if(t==null) { error("Таблицю для експорту не знайдено."); return; }
-            startJob("Зберігаємо "+(json?"JSON":"CSV")+"…","export",()->{
+            if(t==null) { error("The table to export could not be found."); return; }
+            startJob("Saving "+(json?"JSON":"CSV")+"…","export",()->{
                 try(OutputStream stream=getContentResolver().openOutputStream(uri,"wt")) {
-                    if(stream==null) throw new IOException("Не вдалося відкрити файл для запису.");
+                    if(stream==null) throw new IOException("Could not open the file for writing.");
                     try(Writer writer=new BufferedWriter(new OutputStreamWriter(stream,StandardCharsets.UTF_8))) { store.export(t,writer,json); }
                 }
                 return t;
@@ -328,17 +328,17 @@ public final class MainActivity extends Activity {
     }
     private String fileName(Uri uri) {
         try(Cursor c=getContentResolver().query(uri,new String[]{OpenableColumns.DISPLAY_NAME},null,null,null)) { if(c!=null && c.moveToFirst()) return c.getString(0); }
-        catch(Exception ignored) {} return "Імпортована таблиця.csv";
+        catch(Exception ignored) {} return "Imported table.csv";
     }
     private String readCsv(Uri uri) throws IOException {
         try(InputStream in=getContentResolver().openInputStream(uri); ByteArrayOutputStream out=new ByteArrayOutputStream()) {
-            if(in==null) throw new IOException("Не вдалося відкрити CSV.");
+            if(in==null) throw new IOException("Could not open the CSV file.");
             byte[] buffer=new byte[8192]; int size;
-            while((size=in.read(buffer))!=-1) { if(out.size()+size>10*1024*1024) throw new IOException("Файл завеликий. Максимум — 10 МБ."); out.write(buffer,0,size); }
+            while((size=in.read(buffer))!=-1) { if(out.size()+size>10*1024*1024) throw new IOException("The file is too large. The limit is 10 MB."); out.write(buffer,0,size); }
             byte[] bytes=out.toByteArray(); Charset charset=StandardCharsets.UTF_8;
             if(bytes.length>=2 && ((bytes[0]&255)==255 && (bytes[1]&255)==254 || (bytes[0]&255)==254 && (bytes[1]&255)==255)) charset=StandardCharsets.UTF_16;
             try { return charset.newDecoder().onMalformedInput(CodingErrorAction.REPORT).onUnmappableCharacter(CodingErrorAction.REPORT).decode(ByteBuffer.wrap(bytes)).toString(); }
-            catch(CharacterCodingException e) { throw new IOException("Не вдалося прочитати кодування. Збережіть CSV як UTF-8 або UTF-16 із BOM."); }
+            catch(CharacterCodingException e) { throw new IOException("Could not read the encoding. Save the CSV as UTF-8, or UTF-16 with a BOM."); }
         }
     }
     private String readInternalCsv() throws IOException {
@@ -348,7 +348,7 @@ public final class MainActivity extends Activity {
         }
     }
     public void resumeImportSchema() {
-        startJob("Відновлюємо імпорт…","restore",()->Csv.read(readInternalCsv()));
+        startJob("Resuming import…","restore",()->Csv.read(readInternalCsv()));
     }
     public void startJob(String title,String kind,Callable<Object> action) {
         if(job!=null)return;
@@ -360,38 +360,38 @@ public final class MainActivity extends Activity {
         });
     }
     private void showBusy(String title) {
-        page(null,"Комірка",null); ui.space(body,60); ProgressBar progress=new ProgressBar(this); ui.add(body,progress);
-        ui.add(body,ui.title(title),24);ui.add(body,ui.muted("Це може зайняти кілька секунд."),14);
+        page(null,"Komirka",null); ui.space(body,60); ProgressBar progress=new ProgressBar(this); ui.add(body,progress);
+        ui.add(body,ui.title(title),24);ui.add(body,ui.muted("This may take a few seconds."),14);
     }
     private void finishJob(Job current) {
         if(job!=current) return; job=null;
         if(current.error!=null) {
             if(current.kind.equals("create") && schema.table!=null) schema.columns(); else if(active!=null) showTable(active.id); else showHome();
-            String extra=current.kind.equals("export")?" Файл може бути неповним; повторіть експорт.":"";
-            error((current.error.getMessage()==null?"Операцію не вдалося завершити.":current.error.getMessage())+extra); return;
+            String extra=current.kind.equals("export")?" The file may be incomplete. Please export it again.":"";
+            error((current.error.getMessage()==null?"Could not complete the operation.":current.error.getMessage())+extra); return;
         }
         switch(current.kind) {
             case "read": Object[] read=(Object[])current.result; schema.fromCsv((Csv.Document)read[0],(String)read[1]);break;
             case "restore": schema.imported=(Csv.Document)current.result;schema.render();break;
-            case "create": Table t=(Table)current.result;schema.clear();showTable(t.id);toast("Таблицю збережено");break;
-            case "export": showTable(((Table)current.result).id);toast("Файл успішно збережено");break;
+            case "create": Table t=(Table)current.result;schema.clear();showTable(t.id);toast("Table saved");break;
+            case "export": showTable(((Table)current.result).id);toast("File saved");break;
         }
         persistUi();
     }
     private void showHelp() {
-        page("help","Коротко про Комірку",this::showHome); ui.add(body,ui.title("Менше дій.\nБільше порядку."));
-        help("01  Створіть свою таблицю","Назвіть таблицю, оберіть режим ID і додайте стовпці. Для category та ordinal складіть свій список. Порядок ordinal змінюється стрілками.");
-        help("02  Вводьте по одному полю","Текст відкриває клавіатуру, числа — цифрову панель. Категорії, дати та Так/Ні обираються натисканням. Повернутися до будь-якого поля можна на екрані перевірки.");
-        help("03  Завершуйте, коли готові","До фінального підтвердження дані є чернеткою. Вийдіть із додатка та продовжіть пізніше. У кожної таблиці є одна чернетка.");
-        help("04  Редагуйте з історією","Натисніть запис. Змінені значення залишаться в «Історії / aliases». Їх можна відновити, виправити або видалити. Зміни історії також підтверджуються фінальною кнопкою.");
-        help("05  Обмінюйтесь даними","CSV містить заголовки та поточні значення. Порожня клітинка означає пропущене значення. JSON додатково містить схему, категорії, порядок ordinal та aliases. Імпорт підтримує CSV: кома, крапка з комою або табуляція; UTF-8 / UTF-16 із BOM.");
-        help("Ваші дані — на вашому пристрої","Інтернет і обліковий запис не потрібні. Регулярно експортуйте важливі таблиці. Видалення додатка чи очищення його даних видаляє локальні таблиці. JSON — для експорту; повторний імпорт доступний для CSV.");
-        ui.info(body,"Версія 1.0 · Android 8.0 і новіші\nДо 100 стовпців; імпорт до 50 000 записів і 10 МБ.");
+        page("help","Using Komirka",this::showHome); ui.add(body,ui.title("From your first field\nto a finished table."));
+        help("01  Create a table","Name your table, choose an ID mode, and add columns. For category and ordinal fields, add your own options. Use the arrows to arrange ordinal options from lowest to highest.");
+        help("02  Fill in one field at a time","Text and number fields open the appropriate keyboard. Tap to choose categories, dates, or Yes / No. You can return to any field from the review screen.");
+        help("03  Save when you are ready","A record stays in a draft until you confirm it. Leave the app and continue later. Each table keeps one draft.");
+        help("04  Edit and review history","Open a record to edit it. Previous values appear in Value history, where you can restore, edit, or delete them. History changes are applied when you save the record.");
+        help("05  Import and export","CSV includes column headers and current values, with empty cells for missing values. JSON also includes column types, category order, and value history. Import CSV files separated by commas, semicolons, or tabs, in UTF-8 or UTF-16 with a BOM.");
+        help("Your data stays on your device","No internet connection or account is needed. Export important tables regularly: uninstalling the app or clearing its data deletes local tables. You can import CSV files again; JSON is export only.");
+        ui.info(body,"Version 1.0 · Android 8.0 or later\nUp to 100 columns. CSV import: up to 50,000 records and 10 MB.");
     }
     private void help(String title,String content) { ui.section(body,title,content); }
-    public void error(String message) { new AlertDialog.Builder(this).setTitle("Перевірте, будь ласка").setMessage(message).setPositiveButton("Зрозуміло",null).show(); }
+    public void error(String message) { new AlertDialog.Builder(this).setTitle("Please check").setMessage(message).setPositiveButton("OK",null).show(); }
     public void confirm(String title,String message,String action,Runnable yes) {
-        AlertDialog d=new AlertDialog.Builder(this).setTitle(title).setMessage(message).setPositiveButton(action,(dialog,w)->yes.run()).setNegativeButton("Скасувати",null).create();
+        AlertDialog d=new AlertDialog.Builder(this).setTitle(title).setMessage(message).setPositiveButton(action,(dialog,w)->yes.run()).setNegativeButton("Cancel",null).create();
         d.setOnShowListener(v->d.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(RED)); d.show();
     }
     public void toast(String text) { Toast.makeText(this,text,Toast.LENGTH_LONG).show(); }
@@ -399,13 +399,13 @@ public final class MainActivity extends Activity {
     public void keyboard(EditText e) {
         int token=screenToken; e.postDelayed(()->{if(!isDestroyed()&&token==screenToken&&e.isAttachedToWindow()) {e.requestFocus();e.setSelection(e.length());((InputMethodManager)getSystemService(INPUT_METHOD_SERVICE)).showSoftInput(e,InputMethodManager.SHOW_IMPLICIT);}},200);
     }
-    public String date(long value) { return new SimpleDateFormat("dd.MM.yyyy",Locale.forLanguageTag("uk-UA")).format(new Date(value)); }
+    public String date(long value) { return new SimpleDateFormat("MMM d, yyyy",Locale.ENGLISH).format(new Date(value)); }
     // API 33+ uses the platform OnBackInvokedDispatcher registered in onCreate.
     // Keep this override exclusively for the Android 8–12 fallback.
     @android.annotation.SuppressLint("GestureBackNavigation")
     @Override public void onBackPressed() { if(Build.VERSION.SDK_INT<33)back(); }
     public void back() {
-        if(job!=null) { toast("Дочекайтеся завершення операції");return; }
+        if(job!=null) { toast("Please wait for the operation to finish");return; }
         if(screen.equals("entry") && entry!=null) { if(entry.draft.step>0) entry.previous();else leaveEntry(); }
         else if(screen.equals("setup_column")) schema.columns();
         else if(screen.equals("setup_columns")) schema.basics();
