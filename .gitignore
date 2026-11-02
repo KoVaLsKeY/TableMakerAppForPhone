@@ -9,10 +9,11 @@ local.properties
 .DS_Store
 Thumbs.db
 
-# Generated packages and reports; publish installable files as release assets
+# Generated packages and reports, except the download offered in the README
 /artifacts/
 /dist/
 *.apk
+!/Komirka.apk
 *.aab
 
 # Signing keys and local signing configuration
